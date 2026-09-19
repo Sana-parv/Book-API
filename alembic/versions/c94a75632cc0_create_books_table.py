@@ -18,22 +18,26 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
-    op.create_table(
-        "books",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("title", sa.String(), nullable=False),
-        sa.Column("author", sa.String(), nullable=False),
-        sa.Column("description", sa.String(), nullable=True),
-        sa.Column("price", sa.Integer(), nullable=False),
-        sa.PrimaryKeyConstraint("id"),
-    )
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
 
-    op.create_index(
-        op.f("ix_books_id"),
-        "books",
-        ["id"],
-        unique=False,
-    )
+    if "books" not in inspector.get_table_names():
+        op.create_table(
+            "books",
+            sa.Column("id", sa.Integer(), nullable=False),
+            sa.Column("title", sa.String(), nullable=False),
+            sa.Column("author", sa.String(), nullable=False),
+            sa.Column("description", sa.String(), nullable=True),
+            sa.Column("price", sa.Integer(), nullable=False),
+            sa.PrimaryKeyConstraint("id"),
+        )
+
+        op.create_index(
+            op.f("ix_books_id"),
+            "books",
+            ["id"],
+            unique=False,
+        )
 
 
 def downgrade() -> None:
